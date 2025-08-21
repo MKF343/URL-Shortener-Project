@@ -28,7 +28,7 @@ To run this project locally, follow these steps:
 
 **1. Clone the repository:**
 ```bash
-git clone 
+git clone https://github.com/MKF343/URL-Shortener-Project/tree/main
 cd url-shortener
 ```
 
