@@ -16,7 +16,7 @@ urls_table = sqlalchemy.Table(
     "urls",
     metadata,
     sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True),
-    sqlalchemy.Column("short_code", sqlalchemy.String, index=True, unique=True),
+    sqlalchemy.Column("shortcode", sqlalchemy.String, index=True, unique=True),
     sqlalchemy.Column("originalurl", sqlalchemy.String, index=True),
 )
 
@@ -38,7 +38,7 @@ app = FastAPI()
 
 
 #4.Helper Functions
-def get_db():
+def getdb():
     #Dependency to get a database session.
     with Session(engine) as session:
         yield session
@@ -60,31 +60,32 @@ def createShortUrl(request: Request, url_data: URLBase, db: Session = Depends(ge
     #checking if URL already exists
     existing = db.query(urls_table).filter(urls_table.c.originalurl == originalurl).first()
     if existing:
-        short_code = existing.short_code
+        shortcode = existing.shortcode
     else:
         #generate a new unique short code
         while True:
-            short_code = generateshortcode()
-            if not db.query(urls_table).filter(urls_table.c.short_code == short_code).first():
+            shortcode = generateshortcode()
+            if not db.query(urls_table).filter(urls_table.c.shortcode == shortcode).first():
                 break
 
         #save the new entry
-        db.execute(urls_table.insert().values(originalurl=originalurl, short_code=short_code))
+        db.execute(urls_table.insert().values(originalurl=originalurl, shortcode=shortcode))
         db.commit()
 
-    shorturl = f"{request.url.scheme}://{request.url.netloc}/{short_code}"
+    shorturl = f"{request.url.scheme}://{request.url.netloc}/{shortcode}"
 
     return {"originalurl": originalurl, "shorturl": shorturl}
 
 
-@app.get("/{short_code}")
-def redirectToUrl(short_code: str, db: Session = Depends(get_db)):
+@app.get("/{shortcode}")
+def redirectToUrl(shortcode: str, db: Session = Depends(getdb)):
 
     #Looks up the short code and redirects to the original URL.
 
-    entry = db.query(urls_table).filter(urls_table.c.short_code == short_code).first()
+    entry = db.query(urls_table).filter(urls_table.c.shortcode == shortcode).first()
 
     if entry is None:
         raise HTTPException(status_code=404, detail="URL not found")
+
 
     return RedirectResponse(url=entry.originalurl)
