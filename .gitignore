@@ -1,10 +1,11 @@
-# Python
+#Python
 __pycache__/
 *.pyc
 venv/
 
-# Database
+#Database
 urls.db
 
-# IDE
+#IDE
+
 .idea/
